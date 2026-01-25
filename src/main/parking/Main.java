@@ -2,10 +2,8 @@ package parking;
 
 import parking.database.DatabaseConnection;
 import parking.repository.ParkingSpotRepository;
-import parking.service.ParkingSpotService;
 import parking.service.VehicleService;
 import parking.model.ParkingSpot;
-import parking.model.Vehicle;
 
 public class Main {
     public static void main(String[] args) {
