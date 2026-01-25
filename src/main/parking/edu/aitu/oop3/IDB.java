@@ -1,4 +1,4 @@
-package parking.database;
+package parking.edu.aitu.oop3;
 
 import java.sql.Connection;
 import java.sql.SQLException;

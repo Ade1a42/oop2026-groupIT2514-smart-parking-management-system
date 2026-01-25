@@ -1,6 +1,6 @@
 package parking.repository;
 
-import parking.database.IDB;
+import parking.edu.aitu.oop3.IDB;
 import parking.model.ParkingSpot;
 import java.sql.*;
 import java.util.ArrayList;
