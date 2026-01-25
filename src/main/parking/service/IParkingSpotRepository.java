@@ -1,4 +1,4 @@
-package parking.repository;
+package parking.service;
 
 import parking.model.ParkingSpot;
 import java.util.List;

@@ -1,4 +1,4 @@
-package parking.repository;
+package parking.service;
 
 import parking.database.IDB;
 import parking.model.ParkingSpot;
