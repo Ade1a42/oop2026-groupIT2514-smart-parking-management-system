@@ -1,7 +1,7 @@
 package parking;
 
 import parking.database.DatabaseConnection;
-import parking.repository.ParkingSpotRepository;
+import parking.service.ParkingSpotRepository;
 import parking.service.VehicleService;
 import parking.model.ParkingSpot;
 
