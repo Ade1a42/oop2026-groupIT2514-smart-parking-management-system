@@ -11,9 +11,8 @@ public class DatabaseConnection implements IDB {
     private static final String USER =
             "postgres.nvikiacxeckhymdasttx";
     private static final String PASSWORD =
-            "Smart_parking_2026";
+            System.getenv("DB_PASSWORD");
 
-    // Конструктор по умолчанию
     public DatabaseConnection() {}
 
     @Override
