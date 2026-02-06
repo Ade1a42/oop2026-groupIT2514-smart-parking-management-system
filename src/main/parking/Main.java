@@ -49,7 +49,7 @@ public class Main {
                         String plate = scanner.nextLine();
                         System.out.print("Owner name: ");
                         String owner = scanner.nextLine();
-                        Vehicle vehicle = vehicleRepo.create(new Vehicle(plate, owner));
+                        Vehicle vehicle = vehicleRepo.save(new Vehicle(plate, owner));
                         System.out.println("Vehicle registered: " + vehicle.getPlateNumber());
 
                         break;
