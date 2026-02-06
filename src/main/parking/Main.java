@@ -6,11 +6,9 @@ import parking.model.ParkingSpot;
 import parking.model.Vehicle;
 import parking.repository.ParkingSpotRepository;
 import parking.repository.VehicleRepository;
-import parking.exception.InvalidVehiclePlate;
-import parking.exception.NoFreeSpots;
+import parking.util.VehicleFilters;
 
 import java.sql.*;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Scanner;
@@ -32,7 +30,7 @@ public class Main {
             while (running) {
                 System.out.println("\nSelect an option:");
                 System.out.println("1. Register vehicle");
-                System.out.println("2. List all vehicles");
+                System.out.println("2. List all vehicles (with lambda filter)");
                 System.out.println("3. Add parking spot");
                 System.out.println("4. List all parking spots");
                 System.out.println("5. Show available parking spots");
@@ -51,12 +49,23 @@ public class Main {
                         String owner = scanner.nextLine();
                         Vehicle vehicle = vehicleRepo.save(new Vehicle(plate, owner));
                         System.out.println("Vehicle registered: " + vehicle.getPlateNumber());
-
                         break;
 
                     case "2":
                         List<Vehicle> vehicles = vehicleRepo.findAll();
-                        System.out.println("All vehicles:");
+
+                        System.out.print("Filter by owner name (or press Enter to skip): ");
+                        String filterText = scanner.nextLine();
+
+                        if (!filterText.isBlank()) {
+                            vehicles = VehicleFilters.filter(
+                                    vehicles,
+                                    v -> v.getOwnerName() != null &&
+                                            v.getOwnerName().toLowerCase().contains(filterText.toLowerCase())
+                            );
+                        }
+
+                        System.out.println("Vehicles:");
                         for (Vehicle v : vehicles) {
                             System.out.println(v.getId() + ": " + v.getPlateNumber() + " - " + v.getOwnerName());
                         }
@@ -70,15 +79,15 @@ public class Main {
                         System.out.print("Zone: ");
                         String zone = scanner.nextLine();
                         ParkingSpot newSpot = new ParkingSpot(0, number, type, "AVAILABLE", zone);
-
+                        spotRepo.create(newSpot);
                         System.out.println("Added parking spot: " + newSpot.getSpotNumber());
                         break;
 
                     case "4":
                         List<ParkingSpot> allSpots = spotRepo.findAll();
-                        System.out.println("All spots:");
                         for (ParkingSpot s : allSpots) {
-                            System.out.println(s.getId() + ": " + s.getSpotNumber() + " [" + s.getType() + "] Status=" + s.getStatus());
+                            System.out.println(s.getId() + ": " + s.getSpotNumber() +
+                                    " [" + s.getType() + "] Status=" + s.getStatus());
                         }
                         break;
 
@@ -87,7 +96,6 @@ public class Main {
                         if (freeSpots.isEmpty()) {
                             System.out.println("No free spots available.");
                         } else {
-                            System.out.println("Free spots:");
                             for (ParkingSpot s : freeSpots) {
                                 System.out.println(s.getId() + ": " + s.getSpotNumber() + " [" + s.getType() + "]");
                             }
@@ -111,7 +119,7 @@ public class Main {
                         spotToReserve.setStatus("OCCUPIED");
                         spotRepo.update(spotToReserve);
                         activeReservations.put(spotToReserve.getId(), LocalDateTime.now());
-                        System.out.println("Reserved spot " + spotToReserve.getSpotNumber() + " for vehicle " + v.getPlateNumber());
+                        System.out.println("Reserved spot " + spotToReserve.getSpotNumber());
                         break;
 
                     case "7":
@@ -124,32 +132,27 @@ public class Main {
                             break;
                         }
 
-                        // Вводим количество часов вручную
                         System.out.print("Enter number of hours parked: ");
-                        int hoursParked = Integer.parseInt(scanner.nextLine());
+                        int hours = Integer.parseInt(scanner.nextLine());
 
                         double rate = 0;
                         try (Connection conn = db.getConnection();
-                             PreparedStatement stmt = conn.prepareStatement("SELECT hourly_rate FROM tariffs WHERE spot_type = ?")) {
+                             PreparedStatement stmt = conn.prepareStatement(
+                                     "SELECT hourly_rate FROM tariffs WHERE spot_type = ?")) {
                             stmt.setString(1, spotToRelease.getType());
                             ResultSet rs = stmt.executeQuery();
                             if (rs.next()) {
                                 rate = rs.getDouble("hourly_rate");
                             }
-                        } catch (SQLException e) {
-                            System.out.println("Error fetching tariff: " + e.getMessage());
                         }
 
-                        double fee = rate * hoursParked;
-
-                        // Освобождаем место
+                        double fee = rate * hours;
                         spotToRelease.setStatus("AVAILABLE");
                         spotRepo.update(spotToRelease);
                         activeReservations.remove(sid);
 
                         System.out.println("Spot released. Total fee: " + fee);
                         break;
-
 
                     case "8":
                         running = false;
