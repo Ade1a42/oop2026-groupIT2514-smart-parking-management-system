@@ -44,7 +44,6 @@ public class ParkingSpot {
         this.zone = zone;
     }
 
-
     // getters
     public int getId() {
         return id;
