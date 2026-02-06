@@ -1,10 +1,6 @@
 package parking.config;
 
 public class TariffConfig {
-    // my questions:
-    // how this is working in my project i mean role
-
-    // why i need this?
     private static TariffConfig instance;
 
     private double hourlyRate = 5.0;
