@@ -1,11 +1,8 @@
 package parking;
 
-import parking.config.TariffConfig;
 import parking.database.DatabaseConnection;
 import parking.database.IDB;
-import parking.factory.ParkingSpotFactory;
 import parking.model.ParkingSpot;
-import parking.model.Reservation;
 import parking.model.Vehicle;
 import parking.repository.ParkingSpotRepository;
 import parking.repository.VehicleRepository;
@@ -40,7 +37,6 @@ public class Main {
                 System.out.println("6. Reserve a parking spot");
                 System.out.println("7. Release a parking spot and calculate fee");
                 System.out.println("8. Exit");
-                System.out.println("9. Smart Reservation with All Patterns");
                 System.out.print("Enter option: ");
 
                 String option = scanner.nextLine();
@@ -161,60 +157,6 @@ public class Main {
                     case "8":
                         running = false;
                         System.out.println("Exiting...");
-                        break;
-
-                    case "9":
-                        System.out.println("\n=== A4: Smart Reservation (All Patterns) ===");
-
-                        // Show available spots
-                        List<ParkingSpot> freeSpotss = spotRepo.findByStatus("AVAILABLE");
-                        if (freeSpotss.isEmpty()) {
-                            System.out.println("No free spots.");
-                            break;
-                        }
-
-                        System.out.println("Available spots:");
-                        for (int i = 0; i < freeSpotss.size(); i++) {
-                            ParkingSpot spot = freeSpotss.get(i);
-                            System.out.println((i + 1) + ". " + spot.getSpotNumber() + " [" + spot.getType() + "]");
-                        }
-
-                        System.out.print("Select spot: ");
-                        ParkingSpot selectedSpot = freeSpotss.get(Integer.parseInt(scanner.nextLine()) - 1);
-
-                        System.out.print("Vehicle ID: ");
-                        int vehicleId = Integer.parseInt(scanner.nextLine());
-                        Vehicle vehiclee = vehicleRepo.findById(vehicleId);
-                        if (vehiclee == null) {
-                            System.out.println("Vehicle not found!");
-                            break;
-                        }
-
-                        System.out.print("Hours: ");
-                        int hourss = Integer.parseInt(scanner.nextLine());
-
-                        // 1. SINGLETON
-                        TariffConfig config = TariffConfig.getInstance();
-                        double ratee = config.getHourlyRate();
-
-                        // 2. FACTORY
-                        ParkingSpot factorySpot = ParkingSpotFactory.createSpot(
-                                selectedSpot.getType(),
-                                selectedSpot.getSpotNumber(),
-                                selectedSpot.getZone()
-                        );
-
-                        // 3. BUILDER
-                        Reservation reservation = new Reservation.ReservationBuilder(vehicleId, selectedSpot.getId())
-                                .withTotalCost(ratee * hourss)
-                                .build();
-
-
-                        selectedSpot.setStatus("OCCUPIED");
-                        spotRepo.update(selectedSpot);
-                        activeReservations.put(selectedSpot.getId(), LocalDateTime.now());
-
-                        System.out.println("✓ Created with all A4 patterns");
                         break;
 
                     default:
